@@ -1,66 +1,52 @@
-<p align="center">
-  <a href="http://nestjs.com/" target="blank"><img src="https://nestjs.com/img/logo-small.svg" width="120" alt="Nest Logo" /></a>
-</p>
+## Hyper auctions
 
-[travis-image]: https://api.travis-ci.org/nestjs/nest.svg?branch=master
-[travis-url]: https://travis-ci.org/nestjs/nest
-[linux-image]: https://img.shields.io/travis/nestjs/nest/master.svg?label=linux
-[linux-url]: https://travis-ci.org/nestjs/nest
-  
-  <p align="center">A progressive <a href="http://nodejs.org" target="blank">Node.js</a> framework for building efficient and scalable server-side applications.</p>
-    <p align="center">
-<a href="https://www.npmjs.com/~nestjscore"><img src="https://img.shields.io/npm/v/@nestjs/core.svg" alt="NPM Version" /></a>
-<a href="https://www.npmjs.com/~nestjscore"><img src="https://img.shields.io/npm/l/@nestjs/core.svg" alt="Package License" /></a>
-<a href="https://www.npmjs.com/~nestjscore"><img src="https://img.shields.io/npm/dm/@nestjs/core.svg" alt="NPM Downloads" /></a>
-<a href="https://coveralls.io/github/nestjs/nest?branch=master"><img src="https://coveralls.io/repos/github/nestjs/nest/badge.svg?branch=master#5" alt="Coverage" /></a>
-<a href="https://discord.gg/G7Qnnhy" target="_blank"><img src="https://img.shields.io/badge/discord-online-brightgreen.svg" alt="Discord"/></a>
-<a href="https://opencollective.com/nest#backer"><img src="https://opencollective.com/nest/backers/badge.svg" alt="Backers on Open Collective" /></a>
-<a href="https://opencollective.com/nest#sponsor"><img src="https://opencollective.com/nest/sponsors/badge.svg" alt="Sponsors on Open Collective" /></a>
-  <a href="https://paypal.me/kamilmysliwiec"><img src="https://img.shields.io/badge/Donate-PayPal-dc3d53.svg"/></a>
-  <a href="https://twitter.com/nestframework"><img src="https://img.shields.io/twitter/follow/nestframework.svg?style=social&label=Follow"></a>
-</p>
-  <!--[![Backers on Open Collective](https://opencollective.com/nest/backers/badge.svg)](https://opencollective.com/nest#backer)
-  [![Sponsors on Open Collective](https://opencollective.com/nest/sponsors/badge.svg)](https://opencollective.com/nest#sponsor)-->
+App that simulate an auctions using Hyperswarm RPC and Hypercores
 
-## Description
+## How to install
 
-[Nest](https://github.com/nestjs/nest) framework JavaScript starter repository.
+In the root directory of the project execute:
 
-## Installation
+`npm install` or `yarn`
 
-```bash
-$ npm install
-```
+## How it works
 
-## Running the app
+In `hyper-auctions` we need to run who will create and close the auction (the auction host) with this command:
 
-```bash
-# development
-$ npm run start
+`yarn start:auction [your storage directory]` example: `yarn start:auction ./store-auction`
 
-# watch mode
-$ npm run start:dev
-```
+the auction host will publish an address once the command is executed, now we need to run the participants that will join to the auction with this command for each one:
 
-## Test
+`yarn join:auction [user storage directory] [address published by the host]` example: `yarn join:auction ./read-storage 844955f7d5820fd310a41b13dcbb0b7ea964bee5a85997c8c17a691a5bf21756`
 
-```bash
-# unit tests
-$ npm run test
+**Note**: If the app is running in the same machine, storage directory must be different
 
-# e2e tests
-$ npm run test:e2e
+### Comands for Auction host
 
-# test coverage
-$ npm run test:cov
-```
+Once that the auction host is running we can execute commands to handle the auction
 
-## Support
+`/open`: The host will open the auction, the app will ask which price we want to start selling the picture, the open
+price will be notified to all the participants
 
-Nest is an MIT-licensed open source project. It can grow thanks to the sponsors and support by the amazing backers. If you'd like to join them, please [read more here](https://docs.nestjs.com/support).
+`/close`: The host close the auction, the app will notify to all participants who is the winner. Winner is who made the highest bid
 
-## Stay in touch
+### Commands for participants
 
-- Author - [Kamil Myśliwiec](https://twitter.com/kammysliwiec)
-- Website - [https://nestjs.com](https://nestjs.com/)
-- Twitter - [@nestframework](https://twitter.com/nestframework)
+Also for the participants we can execute this command:
+
+`/bid`: The participants set the bid, app will ask the price of the bid, all participants and host will be notified about the bid created
+
+**Note**: if bid lower than the current highest bid, it will be ignored and notified to all the participants, if bid is set before host opens the auction it will be also ignored and notified
+
+## Minor issue
+
+The app works fine but there is a small issue that I didn't have time to resolve, when host or participant wants to exectute again a command, in this case needs to enter a line before it otherwise the input after app question will have the command answer instead of the value of the participant input and it will be ignored
+
+## About the project
+
+I used nestjs because help to create a good structure of the project (of course everything is in javascript), also when I was learning about Hyperpunch I created the module [nest-hyperpunch](https://www.npmjs.com/package/nest-hyperpunch) in order to have all the packages in one and I used in this project.
+The core of the app is possible to find in `src/auctions/auctions.service`  
+
+## Missing in this task
+
+I didn't have time to create unit tests for all those methods `_ask`, `_getBid` and `_getMessage` neither I didn't have time to crearte end to end tests that simulate the auctions flow
+
