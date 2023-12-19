@@ -20,7 +20,7 @@ the auction host will publish an address once the command is executed, now we ne
 
 **Note**: If the app is running in the same machine, storage directory must be different
 
-### Comands for Auction host
+### Commands for Auction host
 
 Once that the auction host is running we can execute commands to handle the auction
 
