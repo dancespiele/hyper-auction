@@ -149,21 +149,26 @@ export class AuctionsService {
   }
 
   async _getBid(data, db, peer) {
-    if(data.toString().includes('hypercore/alpha') || data.toString().match(/\x00-\x1F\x7F/)?.length) {
+    if(data.toString().includes('hypercore/alpha')) {
       return;
     }
 
     if(!data.toString().includes('"price":')) {
       Logger.log(`${peer}: ${data}`);
+
       return;
     }
 
     const dataObj = JSON.parse(data);
     const dataDb = await db.get('bid');
 
+    Logger.log(`${peer}: ${JSON.parse(data).message}`);
+
     if(!dataDb?.value) {
       for (const conn of this.conns) {
-        conn.write(`Bid from ${peer} will be ignored because not open price`)
+        conn.write(JSON.stringify({
+          message: `Bid from ${peer} will be ignored because not open price`
+        }));
       }
 
       return
@@ -171,9 +176,11 @@ export class AuctionsService {
 
     const bids = JSON.parse(dataDb.value);
 
-    if(bids?.some(b => parseInt(b.price) > parseInt(dataObj.price))) {
+    if(bids?.some(b => parseInt(b.price) >= parseInt(dataObj.price))) {
       for (const conn of this.conns) {
-        conn.write(`Bid from ${peer} will be ignored because price lower than current bid`)
+        conn.write(JSON.stringify({
+          message:`Bid from ${peer} will be ignored because price lower or equal than current bid`
+        }));
       }
 
       return
@@ -186,16 +193,10 @@ export class AuctionsService {
   }
 
   _getMessage(data, peer) {
-    if(data.toString().includes('hypercore/alpha') || data.toString().match(/\x00-\x1F\x7F/)?.length) {
-      return;
-    }
-
     if(data.toString().includes('"message":')) {
       Logger.log(`${peer}: ${JSON.parse(data).message}`)
       return;
     }
-
-    Logger.log(`${peer}: ${data}`);
   }
 
   _ask(question) {
